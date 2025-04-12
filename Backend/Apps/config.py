@@ -20,3 +20,4 @@ SQLALCHEMY_ECHO = True
 os.environ["OPENAI_BASE_URL"] = "https://api.chatanywhere.tech/v1"
 os.environ["OPENAI_API_KEY"] = "sk-OyEPaIflRbJXIospoq197kPskfatY1UmbfKKOszLJicK7RuJ"
 model = "gpt-4o-mini"
+temperature=0.5 #LLM 温度
