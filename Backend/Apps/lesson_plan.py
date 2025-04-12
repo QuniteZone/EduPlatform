@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from .genericFunction import LLM
+from .genericFunction import LLM,lesson_plan_prompt
 
 
 lesson_plan_bp = Blueprint('lesson_plan', __name__)
@@ -10,11 +10,11 @@ def generate():
 
 
 
-
-
 @lesson_plan_bp.route('/lesson_plan', methods=['GET', 'POST'])
 def get_lesson_plan():
-
-    print(f"test:{LLM()}")
+    messages = [{"role": "system",
+                 "content": "你是一个教案生成专家，严格按JSON格式输出结构化教案内容，确保键值命名与层级关系绝对准确"},
+                {"role": "user", "content": lesson_plan_prompt}]
+    print(f"test:###\n{LLM(messages)}\n###")
 
     return jsonify({"message": "This is the lesson plan blueprint!"})
