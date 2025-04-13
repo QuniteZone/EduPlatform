@@ -58,9 +58,10 @@ const subjectOptions = [
 
 const generateContent = async () => {
   try {
-    const response = await axios.post('/api/plan/get_info', {
+    const response = await axios.post('/api/plan/lesson_plan', {
       grade: grade.value,
       subject: subject.value,
+      knowledge:""
     });
 
     emit('update-preview', response.data)  // 发送数据给父组件
