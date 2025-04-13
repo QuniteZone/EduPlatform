@@ -12,14 +12,13 @@ def generate():
 @lesson_plan_bp.route('/lesson_plan', methods=['GET', 'POST'])
 def get_lesson_plan():
     if request.method == 'POST':
-        grade=request.form.get('grade')
-        subject = request.form.get('subject')
-        knowledge=request.form.get('knowledge')
+        grade=request.json.get('grade')
+        subject = request.json.get('subject')
+        knowledge=request.json.get('knowledge')
     else:
         grade = request.args.get('grade')
         subject = request.args.get('subject')
         knowledge = request.args.get('knowledge')
-
     promtp=lesson_plan_prompt.format(grade=grade, subject=subject, knowledge=knowledge)
     messages = [{"role": "system",
                  "content": "你是一个教案生成专家，严格按JSON格式输出结构化教案内容，确保键值命名与层级关系绝对准确"},
