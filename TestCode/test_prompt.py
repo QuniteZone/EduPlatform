@@ -3,10 +3,9 @@ import os
 import openai
 
 #
-os.environ["OPENAI_BASE_URL"] = "https://api.chatanywhere.tech/v1"
-os.environ["OPENAI_API_KEY"] = "sk-OyEPaIflRbJXIospoq197kPskfatY1UmbfKKOszLJicK7RuJ"
-# model="xdeepseekv3"
-model = "gpt-4o-mini"
+os.environ["OPENAI_BASE_URL"] = "https://api.chatanywhere.tech"
+os.environ["OPENAI_API_KEY"] = "sk-QBFgXmIcXeaR5v40BZN3jabFKtSkoudkpIz4vmGU6V8Uu4N6"
+model='gpt-3.5-turbo'
 
 
 def predict(model, messages, temperature=0, top_p=1, max_tokens=4096):
