@@ -2,7 +2,7 @@ const { defineConfig } = require('@vue/cli-service')
 
 module.exports = defineConfig({
   transpileDependencies: true,
-  
+  // 测试测试测试123123123
   devServer: {
     proxy: {
       // /api：这是代理的前缀路径。所有以 /api 开头的请求都会被代理到指定的目标服务器。
