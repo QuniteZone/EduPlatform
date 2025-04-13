@@ -24,10 +24,10 @@ SQLALCHEMY_ECHO = True
 os.environ["OPENAI_BASE_URL"] = "https://api.chatanywhere.tech"
 os.environ["OPENAI_API_KEY"] = "sk-QBFgXmIcXeaR5v40BZN3jabFKtSkoudkpIz4vmGU6V8Uu4N6"
 model='gpt-3.5-turbo'
-
 temperature=0.5 #LLM 温度
 
 
-#rag_flow
+#rag_flow 基本配置信息
 ragflow_BASE_URL = "http://127.0.0.1"  # rag_flow的后端地址
-ragflow_API_KEY = "ragflow-QwMDMzYWMyMTgzMzExZjBhZGI0MDI0Mm"  # rag_flow的 API Key
+# ragflow_API_KEY = "ragflow-QwMDMzYWMyMTgzMzExZjBhZGI0MDI0Mm"  # rag_flow的 API Key
+ragflow_API_KEY="ragflow-NhN2I5ODZhMTg0MzExZjA4OThkNWFiZW" #qgz 的api key密钥
