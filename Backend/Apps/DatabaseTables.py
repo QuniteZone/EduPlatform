@@ -1,3 +1,4 @@
+### 用于存放数据库的表格类
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
