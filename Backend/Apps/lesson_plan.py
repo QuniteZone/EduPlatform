@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from .genericFunction import LLM,lesson_plan_prompt
 
-
+#这是教案生成
 lesson_plan_bp = Blueprint('lesson_plan', __name__)
 
 @lesson_plan_bp.route("/generate", methods=["GET","POST"])
