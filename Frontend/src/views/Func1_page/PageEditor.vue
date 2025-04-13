@@ -47,8 +47,9 @@ const generateContent = async () => {
     const response = await axios.post('/api/plan/lesson_plan', {
       grade: grade.value,
       subject: subject.value,
-      knowledge: ""
-    });
+      knowledge: content.value
+      });
+    console.log('Editor_content:', response.data);
     emit('update-preview', response.data)
   } catch (error) {
     alert('生成失败');

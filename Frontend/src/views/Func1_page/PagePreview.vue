@@ -1,7 +1,7 @@
 <template>
   <section class="preview">
-    <div v-if="formattedContent" class="content">
-      <h3>{{ formattedContent }}</h3>
+    <div v-if="compiledMarkdown" class="content">
+        <div v-html="compiledMarkdown"></div>
     </div>
     <div v-else>
       待生成内容
@@ -10,6 +10,8 @@
 </template>
 
 <script>
+import { marked } from 'marked';
+import DOMPurify from 'dompurify';  // 安全过滤
 export default {
   props: {
     content: {
@@ -18,14 +20,20 @@ export default {
     }
   },
   computed: {
-    formattedContent() {
+    compiledMarkdown() {
       try {
-        return JSON.parse(this.content)
+        if (this.content.status === 0) {
+          return '<div class="error-message">内容加载失败，请稍后重试</div>';
+        }
+        // 解析Markdown并进行安全过滤
+        const html = marked.parse(this.content.content || '');
+        return DOMPurify.sanitize(html);
       } catch (error) {
-        return null
+        return '<div class="error-message">内容解析失败</div>';
       }
     }
   }
+
 };
 </script>
 
