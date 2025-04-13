@@ -8,7 +8,6 @@ lesson_plan_bp = Blueprint('lesson_plan', __name__)
 def generate():
     return jsonify({"result": "这是一个内容内容内容"})
 
-#{'content': "内容，内容"}
 
 @lesson_plan_bp.route('/lesson_plan', methods=['GET', 'POST'])
 def get_lesson_plan():
@@ -20,11 +19,11 @@ def get_lesson_plan():
         grade = request.args.get('grade')
         subject = request.args.get('subject')
         knowledge = request.args.get('knowledge')
-    print(f"{grade}, {subject}, {knowledge}")
-        
+
+    promtp=lesson_plan_prompt.format(grade=grade, subject=subject, knowledge=knowledge)
     messages = [{"role": "system",
                  "content": "你是一个教案生成专家，严格按JSON格式输出结构化教案内容，确保键值命名与层级关系绝对准确"},
-                {"role": "user", "content": lesson_plan_prompt}]
+                {"role": "user", "content": promtp}]
 
     return_result=LLM(messages)
     content={} #返回结构
@@ -46,8 +45,7 @@ def get_info():
     subject = data.get('subject')
     content = f"生成的内容:年级-{grade}，课程 - {subject}"
 
-    # print(f"content:{}")
-    # return jsonify({'content': content})
+
     return "test"
 
 
