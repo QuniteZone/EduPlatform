@@ -32,7 +32,7 @@ export default {
   },
   methods: {
     updatePreview(newData) {
-      this.previewContent = JSON.stringify(newData);  // 直接更新预览内容
+      this.previewContent = newData;  // 直接更新预览内容
     },
   },
 };
