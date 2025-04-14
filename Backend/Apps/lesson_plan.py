@@ -27,12 +27,16 @@ def get_lesson_plan():
     return_result=LLM(messages)
     content={} #返回结构
 
+    return_result=f"""<table style="width: auto;"><tbody><tr><th colSpan="1" rowSpan="1" width="auto">学号</th><th colSpan="1" rowSpan="1" width="auto">姓名</th><th colSpan="1" rowSpan="1" width="auto">年级</th><th colSpan="1" rowSpan="1" width="auto">家庭</th><th colSpan="1" rowSpan="1" width="auto">备注</th></tr><tr><td colSpan="1" rowSpan="1" width="auto">2024022497</td><td colSpan="1" rowSpan="1" width="auto">覃国中</td><td colSpan="1" rowSpan="1" width="auto">研一</td><td colSpan="1" rowSpan="1" width="auto">贵州</td><td colSpan="1" rowSpan="1" width="auto">无</td></tr><tr><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td></tr><tr><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td></tr><tr><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td><td colSpan="1" rowSpan="1" width="auto"></td></tr></tbody></table><p><br></p >"""
+
     if return_result==False:
         content["status"]=0 #报错
         content["content"]=None
     else:
         content["status"]=1
         content["content"]=return_result
+
+
 
     return_result=jsonify(content)
     return return_result
@@ -49,15 +53,7 @@ def get_info():
 
     return "test"
 
-"""
-1.零代码实现前端，时间重点花费在功能实现上面。
-2.重点不是UI，重点实现功能是什么程度。一定程度上在集成到贵兰在线上面去。
-3.以我们为主，集成到贵兰上面去。
-4.PPT——AiPPT开源框架。
-5.
 
-
-"""
 
 
 
