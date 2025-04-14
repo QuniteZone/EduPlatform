@@ -2,6 +2,7 @@ const { defineConfig } = require('@vue/cli-service')
 
 module.exports = defineConfig({
   transpileDependencies: true,
+  lintOnSave: false,
   // 测试测试测试123123123
   devServer: {
     proxy: {
