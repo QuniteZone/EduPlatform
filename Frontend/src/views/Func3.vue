@@ -1,168 +1,229 @@
 <template>
-    <div class="mian_container">
-      <div class="about">
-        <h2>课时PPT</h2>
-        <h4>助教场景：AI辅助PPT智能生成</h4>
-      </div>
-      <div class="editor-preview-container">
-        <!-- @update-preview="updatePreview"：监听子组件Editor 触发的自定义事件 update-preview。
-        当 Editor 组件触发该事件时，调用父组件中的方法 updatePreview。 -->
-        <Editor class="editor" @update-preview="updatePreview" />
-        <Preview class="preview" :content="previewContent" />
+  <div class="app-container">
+    <div class="page_navigate">
+      <div
+        v-for="page in pages"
+        :key="page.id"
+        :class="{ selected: currentPage === page.id }"
+        @click="toPage(page.id)"
+        class="nav-item"
+      >
+        {{ page.label }}
       </div>
     </div>
-  </template>
-  
-  <script>
-  import Editor from "./Func1_page/PageEditor.vue";
-  import Preview from "./Func1_page/PagePreview.vue";
-  
-  export default {
-    name: 'FunctionOne',
-    components: {
-      Editor,
-      Preview,
+
+    <!-- 主容器 -->
+    <div id="container" ref="container"></div>
+  </div>
+</template>
+
+<script>
+import { DocmeeUI } from '@docmee/sdk-ui';
+
+export default {
+  name: 'AiPptDemo',
+  data() {
+    return {
+      apiKey: process.env.VUE_APP_API_KEY || 'ak_r_n1lbppv5rrFcmG8E', // 从环境变量获取
+      uid: '200109',
+      limit: null,
+      token: null,
+      currentPage: 'creator',
+      docmeeUI: null,
+      pages: [
+        {id: 'creator', label: '生成PPT'},
+        {id: 'dashboard', label: 'PPT列表'},
+        {id: 'customTemplate', label: '自定义模板'}
+      ]
+    }
+  },
+  async mounted() {
+    if (location.protocol === 'file:') {
+      alert('不支持 file 协议访问，请使用HTTP服务');
+      return;
+    }
+
+    try {
+      this.token = await this.createApiToken();
+      if (this.token) {
+        this.initializeUI();
+      }
+    } catch (error) {
+      console.error('初始化失败:', error);
+      alert('初始化失败，请检查控制台日志');
+    }
+  },
+  beforeUnmount() {
+    this.docmeeUI?.destroy();
+  },
+  methods: {
+    // 创建API Token（异步处理）
+    async createApiToken() {
+      if (!this.apiKey) {
+        alert('API Key未配置');
+        return null;
+      }
+
+      try {
+        const response = await fetch('https://docmee.cn/api/user/createApiToken', {
+          method: 'POST',
+          headers: {
+            'Api-Key': this.apiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            uid: this.uid,
+            limit: this.limit
+          })
+        });
+
+        if (!response.ok) throw new Error(`HTTP错误: ${response.status}`);
+
+        const data = await response.json();
+        if (data.code !== 0) throw new Error(data.message);
+        return data.data.token;
+
+      } catch (error) {
+        console.error('Token创建失败:', error);
+        alert('认证失败，请检查API Key配置');
+        return null;
+      }
     },
-    data() {
-      return {
-        previewContent: "NULL"
+
+    // 初始化UI组件
+    initializeUI() {
+      this.docmeeUI = new DocmeeUI({
+        token: this.token,
+        container: this.$refs.container,
+        page: this.currentPage,
+        lang: 'zh',
+        mode: 'light',
+        isMobile: false,
+        background: 'linear-gradient(-157deg,#f57bb0, #867dea)',
+        padding: '40px 20px 0px',
+        onMessage: this.handleMessage
+      });
+    },
+
+    // 统一消息处理器
+    handleMessage(message) {
+      const handlers = {
+        'invalid-token': () => this.handleInvalidToken(),
+        'before-generate': (data) => this.handleBeforeGenerate(data),
+        'before-create-custom-template': (data) => this.handleBeforeCreateTemplate(data),
+        'page-change': (data) => this.currentPage = data.page,
+        'before-download': (data) => this.handleBeforeDownload(data),
+        'error': (data) => this.handleError(data)
       };
+
+      const handler = handlers[message.type];
+      return handler ? handler(message.data) : console.warn('未知消息类型:', message);
     },
-    methods: {
-      updatePreview(newData) {
-        this.previewContent = newData;  // 直接更新预览内容
-      },
+
+    // Token失效处理
+    handleInvalidToken() {
+      this.createApiToken().then(newToken => {
+        if (newToken) {
+          this.token = newToken;
+          this.docmeeUI.updateToken(newToken);
+        }
+      });
     },
-  };
-  </script>
-  
-  <style scoped>
-  /* 全局样式设置 */
-  body {
-    font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;  /* 设置默认字体 */
-    margin: 0;                       /* 清除默认外边距 */
-    padding: 0;                      /* 清除默认内边距 */
-  }
-  
-  /* 主容器样式 */
-  .mian_container {
-    margin-right: 80px;              /* 右侧外边距 */
-    margin-left: 80px;               /* 左侧外边距 */
-    margin-top: 40px;                /* 顶部外边距 */
-  }
-  
-  /* 标题区域样式 */
-  .about {
-    display: flex;                   /* 使用flex布局 */
-    flex-direction: column;          /* 垂直方向排列 */
-    align-items: center;             /* 水平居中 */
-    justify-content: center;         /* 垂直居中 */
-    text-align: center;              /* 文本居中对齐 */
-    margin: 2rem auto;               /* 上下外边距2rem，左右自动居中 */
-    background: linear-gradient(135deg, #baeea0 0%, #e9ecef 100%); /* 浅灰色渐变背景 */
-    border-radius: 1rem;             /* 圆角边框 */
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* 阴影效果 */
-    border: 1px solid rgba(255, 255, 255, 0.3); /* 半透明白色边框 */
-    max-width: 10000px;              /* 最大宽度限制 */
-    height: 200px;                   /* 固定高度 */
-  }
-  
-  /* 主标题样式 */
-  .about h2 {
-    color: #458fd8;                  /* 文字颜色 */
-    font-size: 2.5rem;               /* 字体大小 */
-    font-weight: 700;                /* 字体粗细 */
-    margin-top: 0;                   /* 移除顶部外边距 */
-    margin-bottom: 0.5rem;           /* 减小底部外边距 */
-    letter-spacing: -0.5px;          /* 字间距 */
-    position: relative;              /* 相对定位 */
-    padding-top: -10rem;              /* 添加顶部内边距 */
-  }
-  
-  /* 副标题样式 */
-  .about h4 {
-    color: #518fc5;                  /* 文字颜色 */
-    font-size: 1.3rem;               /* 字体大小 */
-    font-weight: 400;                /* 字体粗细 */
-    margin: 0;                       /* 移除外边距 */
-    padding: 0.8rem 1.5rem;          /* 内边距 */
-    background: rgba(255, 255, 255, 0.9); /* 半透明白色背景 */
-    border-radius: 1rem;             /* 圆角边框 */
-    display: inline-block;           /* 行内块级元素 */
-    border: 1px solid rgba(0, 0, 0, 0.05); /* 细边框 */
-  }
-  
-  /* 编辑器预览容器样式 */
-  .editor-preview-container {
-    display: flex;                   /* 使用flex布局 */
-    gap: 25px;                       /* 子元素间距 */
-    height: 50vh;                    /* 设置固定高度 */
-    margin-top: 20px;                /* 添加上边距 */
-    width: 100%;                     /* 占满父容器宽度 */
-  }
-  
-  /* 编辑器和预览区域共用样式 */
-  .editor,
-  .preview {
-    flex: 0 0 calc(50% - 12.5px);   /* 各占50%宽度，减去间距的一半 */
-    border: 1px solid rgba(0, 0, 0, 0.1); /* 边框样式 */
-    padding: 15px;                   /* 内边距 */
-    box-sizing: border-box;          /* 盒模型计算方式 */
-    color: #2c3e50;                  /* 文字颜色 */
-    background-color: #ffffff;       /* 背景颜色 */
-    border-radius: 10px;             /* 圆角边框 */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* 阴影效果 */
-    transition: all 0.3s ease;       /* 过渡动画 */
-    height: 100%;                    /* 占满容器高度 */
-  }
-  
-  .editor:hover,
-  .preview:hover {
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* 悬停时加深阴影 */
-    transform: translateY(-2px);      /* 悬停时轻微上移 */
-  }
-  
-  /* 动画关键帧 */
-  @keyframes fadeInDown {
-    from {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+
+    // 生成前验证
+    handleBeforeGenerate({subtype}) {
+      if (!['outline', 'ppt'].includes(subtype)) return false;
+      console.log(`开始生成${subtype === 'outline' ? '大纲' : 'PPT'}`);
+      return true;
+    },
+
+    // 模板创建前验证
+    handleBeforeCreateTemplate({totalPptCount}) {
+      if (totalPptCount < 2) {
+        alert('生成积分不足，无法创建模板');
+        return false;
+      }
+      return true;
+    },
+
+    // 下载前处理
+    handleBeforeDownload({subject}) {
+      return `PPT_${subject}_${Date.now()}.pptx`;
+    },
+
+    // 统一错误处理
+    handleError({code, message}) {
+      const errorMap = {
+        88: '生成次数已用完',
+        default: `发生错误：${message}`
+      };
+      alert(errorMap[code] || errorMap.default);
+    },
+
+    // 页面跳转
+    toPage(pageId) {
+      if (this.currentPage === pageId) return;
+      this.currentPage = pageId;
+      this.docmeeUI.navigate({page: pageId});
+    },
+
+    // 跳转示例二
+    goToDemo2() {
+      if (this.token) {
+        window.location.href = `/demo2?token=${encodeURIComponent(this.token)}`;
+      } else {
+        alert('Token未就绪，无法跳转');
+      }
     }
   }
-  
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* 响应式设计 */
-  @media (max-width: 768px) {
-    /* 移动端主容器样式 */
-    .mian_container {
-      margin: 20px;                  /* 统一外边距 */
-    }
-    
-    /* 移动端编辑器预览容器样式 */
-    .editor-preview-container {
-      flex-direction: column;         /* 垂直排列 */
-      gap: 20px;                      /* 子元素间距 */
-      height: auto;                   /* 自动高度 */
-    }
-    
-    .editor,
-    .preview {
-      flex: 0 0 100%;                /* 移动设备上占满宽度 */
-      height: 50vh;                   /* 移动设备上的固定高度 */
-    }
-  }
-  </style>
+}
+</script>
+
+<style scoped>
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  padding: 20px;
+  box-sizing: border-box;
+  background: #f9f9f9; /* 淡灰色背景 */
+}
+
+.demo-notice {
+  text-align: center;
+  padding: 1rem;
+  background: #f0f8ff; /* 淡蓝色背景 */
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  color: #555; /* 柔和的文字颜色 */
+}
+
+.page_navigate {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.nav-item {
+  padding: 0.8rem 1.5rem;
+  background: #e6f7ff; /* 淡蓝色按钮背景 */
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: #333; /* 柔和的文字颜色 */
+}
+
+.nav-item.selected {
+  background: linear-gradient(-157deg, #b3e5fc, #c8e6c9); /* 淡蓝到淡绿渐变 */
+  color: #fff; /* 白色文字 */
+}
+
+#container {
+  width: 100%;
+  height: calc(100vh - 200px);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05); /* 更柔和的阴影 */
+  overflow: hidden;
+  position: relative;
+  background: #ffffff; /* 纯白背景 */
+}
+</style>
