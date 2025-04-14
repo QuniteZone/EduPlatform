@@ -4,7 +4,7 @@
       
       <el-menu-item index="/function1"><el-icon><Memo /></el-icon>教案生成</el-menu-item>
       <el-menu-item index="/function2"><el-icon><Tickets /></el-icon>逐字稿生成</el-menu-item>
-      <el-menu-item index="-3" disabled><el-icon><Monitor /></el-icon>PPT生成</el-menu-item>
+      <el-menu-item index="/function3" ><el-icon><Monitor /></el-icon>PPT生成</el-menu-item>
       <el-menu-item index="-4" disabled><el-icon><DataLine /></el-icon>班会稿生成</el-menu-item>
       <el-sub-menu index="-1">
         <template #title>测试1</template>
