@@ -21,19 +21,22 @@ def get_lesson_plan():
         knowledge = request.args.get('knowledge')
     promtp=lesson_plan_prompt.format(grade=grade, subject=subject, knowledge=knowledge)
     messages = [{"role": "system",
-                 "content": "你是一个教案生成专家，严格按JSON格式输出结构化教案内容，确保键值命名与层级关系绝对准确"},
+                 "content": "你是一个教案生成专家，严格按Markdown格式输出结构化教案内容，确保键值命名与层级关系绝对准确"},
                 {"role": "user", "content": promtp}]
 
     return_result=LLM(messages)
     content={} #返回结构
+
     if return_result==False:
         content["status"]=0 #报错
         content["content"]=None
     else:
         content["status"]=1
         content["content"]=return_result
+
     return_result=jsonify(content)
     return return_result
+
 
 
 
@@ -44,8 +47,17 @@ def get_info():
     subject = data.get('subject')
     content = f"生成的内容:年级-{grade}，课程 - {subject}"
 
-
     return "test"
+
+"""
+1.零代码实现前端，时间重点花费在功能实现上面。
+2.重点不是UI，重点实现功能是什么程度。一定程度上在集成到贵兰在线上面去。
+3.以我们为主，集成到贵兰上面去。
+4.PPT——AiPPT开源框架。
+5.
+
+
+"""
 
 
 
