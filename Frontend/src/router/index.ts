@@ -2,6 +2,9 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import Func1 from '../views/Func1.vue'
 import Func2 from '../views/Func2.vue'
 import Func3 from '../views/Func3.vue'
+import Func4 from '../views/Func4.vue'
+import Func5 from '../views/Func5.vue'
+
 import PageEditor from '../views/Func1_page/PageEditor.vue'
 import PagePreview from '../views/Func1_page/PagePreview.vue'
 import PagePreview2 from '@/views/Func1_page/PagePreview2.vue'
@@ -22,6 +25,16 @@ const routes: Array<RouteRecordRaw> = [
     path: '/function3',
     name: 'Function3',
     component: Func3
+  },
+  {
+    path: '/function4',
+    name: 'Function4',
+    component: Func4
+  },
+  {
+    path: '/function5',
+    name: 'Function5',
+    component: Func5
   },
   {
     path: '/editor',

@@ -63,7 +63,6 @@ export default {
         alert('API Key未配置');
         return null;
       }
-
       try {
         const response = await fetch('https://docmee.cn/api/user/createApiToken', {
           method: 'POST',
