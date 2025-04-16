@@ -1,8 +1,8 @@
 <template>
   <div class="mian_container">
     <div class="about">
-      <h2>逐字稿生成</h2>
-      <h4>助教场景：AI辅助自动逐字稿</h4>
+      <h2>班会稿生成</h2>
+      <h4>助教场景：AI辅助班会稿生成</h4>
     </div>
     <div class="editor-preview-container">
       <!-- @update-preview="updatePreview"：监听子组件Editor 触发的自定义事件 update-preview。
@@ -14,8 +14,8 @@
 </template>
 
 <script>
-import Editor from "./Func2_page/PageEditor.vue";
-import Preview from "./Func2_page/PagePreview2.vue";
+import Editor from "./Func4_page/PageEditor.vue";
+import Preview from "./Func4_page/PagePreview.vue";
 
 export default {
   name: 'FunctionOne',
