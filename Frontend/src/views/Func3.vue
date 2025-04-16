@@ -99,7 +99,7 @@ export default {
         lang: 'zh',
         mode: 'light',
         isMobile: false,
-        background: 'linear-gradient(-157deg,#f57bb0, #867dea)',
+        background: 'linear-gradient(-157deg,	#87CEFA, #E0FFFF)',
         padding: '40px 20px 0px',
         onMessage: this.handleMessage
       });
@@ -213,7 +213,7 @@ export default {
 }
 
 .nav-item.selected {
-  background: linear-gradient(-157deg, #b3e5fc, #c8e6c9); /* 淡蓝到淡绿渐变 */
+  background: linear-gradient(-157deg, #49b9ff, #b3e5fc); /* 淡蓝到淡绿渐变 */
   color: #fff; /* 白色文字 */
 }
 
