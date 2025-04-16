@@ -74,10 +74,14 @@ onBeforeUnmount(() => {
 
 // 下载 Word
 const downloadWord = () => {
+    
     if (editorRef.value) {
         const html = editorRef.value.getHtml()
         const docx = htmlToDocx.asBlob(html)
         const link = document.createElement('a')
+        console.log(editorRef.value)
+        console.log(html)
+        console.log(docx)
         link.href = URL.createObjectURL(docx)
         link.download = 'document.docx'
         link.click()
