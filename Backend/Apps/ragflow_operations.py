@@ -3,14 +3,15 @@ import json
 import requests
 import time
 import os
-from config import ragflow_BASE_URL, ragflow_API_KEY
 
 class RAGflow:
-    def __init__(self):
+    def __init__(self,ragflow_BASE_URL, ragflow_API_KEY):
         self.HEADERS = {
             "Authorization": f"Bearer {ragflow_API_KEY}",
             "Content-Type": "application/json"
         }
+        self.BASE_URL = ragflow_BASE_URL
+        self.API_KEY = ragflow_API_KEY
 
     def create_dataset(self, name: str, description: str = "") -> str:
         """
@@ -19,7 +20,7 @@ class RAGflow:
         timestamp = int(time.time())
         unique_name = f"{name}_{timestamp}"
 
-        url = f"{ragflow_BASE_URL}/api/v1/datasets"
+        url = f"{self.BASE_URL}/api/v1/datasets"
         payload = {
             "name": unique_name,
             "description": description
@@ -39,7 +40,7 @@ class RAGflow:
         批量上传文档到指定数据集并自动解析
         """
         # 1. 上传文档
-        upload_url = f"{ragflow_BASE_URL}/api/v1/datasets/{dataset_id}/documents"
+        upload_url = f"{self.BASE_URL}/api/v1/datasets/{dataset_id}/documents"
         document_ids = []
 
         try:
@@ -48,7 +49,7 @@ class RAGflow:
                     # 使用files参数上传文件
                     response = requests.post(
                         upload_url,
-                        headers={"Authorization": f"Bearer {ragflow_API_KEY}"},
+                        headers={"Authorization": f"Bearer {self.API_KEY}"},
                         files={'file': (os.path.basename(file_path), file)}
                     )
 
@@ -65,7 +66,7 @@ class RAGflow:
                     print(f"文档上传成功: {document_id}")
 
             # 2. 触发解析
-            parse_url = f"{ragflow_BASE_URL}/api/v1/datasets/{dataset_id}/chunks"
+            parse_url = f"{self.BASE_URL}/api/v1/datasets/{dataset_id}/chunks"
             parse_payload = {
                 "document_ids": document_ids
             }
@@ -108,7 +109,7 @@ class RAGflow:
             page = 1
             page_size = 10
             while status_docs:
-                url = f"{ragflow_BASE_URL}/api/v1/datasets/{dataset_id}/documents?page={page}&page_size={page_size}&orderby={orderby}&desc={str(desc).lower()}&keywords={keywords}&id={document_id}&name={document_name}"
+                url = f"{self.BASE_URL}/api/v1/datasets/{dataset_id}/documents?page={page}&page_size={page_size}&orderby={orderby}&desc={str(desc).lower()}&keywords={keywords}&id={document_id}&name={document_name}"
                 response = requests.get(url, headers=self.HEADERS)
 
                 if response.status_code != 200:
@@ -154,7 +155,7 @@ class RAGflow:
         """
         创建聊天助手，返回助手的ID
         """
-        url = f"{ragflow_BASE_URL}/api/v1/chats"
+        url = f"{self.BASE_URL}/api/v1/chats"
 
         # 构建请求体
         payload = {
@@ -180,7 +181,7 @@ class RAGflow:
         """
         创建与聊天助手的会话，返回会话的ID
         """
-        url = f"{ragflow_BASE_URL}/api/v1/chats/{assistant_id}/sessions"
+        url = f"{self.BASE_URL}/api/v1/chats/{assistant_id}/sessions"
 
         # 构建请求体
         payload = {
@@ -205,7 +206,7 @@ class RAGflow:
         """
         向指定的聊天助手提问以开始 AI 驱动的对话，返回助手的回答和会话信息
         """
-        url = f"{ragflow_BASE_URL}/api/v1/chats/{assistant_id}/completions"
+        url = f"{self.BASE_URL}/api/v1/chats/{assistant_id}/completions"
 
         # 构建请求体
         payload = {
@@ -248,11 +249,12 @@ class RAGflow:
         else:
             raise Exception(f"请求失败，状态码: {response.status_code}, 响应内容: {response.text}")
 
+
     def create_agent_session(self, agent_id: str, user_id: str = None, **kwargs) -> str:
         """
         创建与代理的会话，返回会话的ID
         """
-        url = f"{ragflow_BASE_URL}/api/v1/agents/{agent_id}/sessions"
+        url = f"{self.BASE_URL}/api/v1/agents/{agent_id}/sessions"
 
         # 构建请求体
         payload = kwargs  # 将其他参数作为请求体的一部分
@@ -276,7 +278,7 @@ class RAGflow:
         """
         向指定的代理提问以开始 AI 驱动的对话，返回代理的回答和会话信息
         """
-        url = f"{ragflow_BASE_URL}/api/v1/agents/{agent_id}/completions"
+        url = f"{self.BASE_URL}/api/v1/agents/{agent_id}/completions"
 
         # 构建请求体
         payload = {
@@ -321,82 +323,83 @@ class RAGflow:
 
 
 
-
-# 示例使用
-if __name__ == "__main__":
-    ragflow = RAGflow()
-    # 创建数据集、上传文档、创建聊天助手、创建会话等操作
-
-    dataset_id = f"4f34a594192d11f093b942e643a9908f"  # 知识库ID
-    assistant_id = f"395418f2192f11f0988f42e643a9908f"  # 会话助手ID
-    assistan_session_id = f"4f432590192f11f0b3ad42e643a9908f"  # 聊天会话的ID
-    #### 示例使用
-    # # 1. 创建数据集
-    if dataset_id == None:
-        dataset_id = ragflow.create_dataset("测试数据集2", "上传文档并解析测试")
-        print(f"成功创建知识库，dataset_id: {dataset_id}")
-
-    # # 2. 上传并解析文档
-    # folder_path = f"D:/projcet_LLM/EduPlatform/Backend/static/ragflowParserDocs"
-    # file_paths = ragflow.get_file_paths(folder_path)
-    # document_id = ragflow.upload_and_parse_documents(dataset_id, file_paths)
-
-
-    # 3.获取所有文档解析最新状态
-    # 获取文档解析状态
-    is_has_running, documents = ragflow.get_files_is_running(dataset_id)  # is_has_running为bool true表示有文件处于解析中 false则没有处于解析中
-    # 打印文档解析状态
-    print(f"获取文件状态：{is_has_running}")
-    for document in documents:
-        print(f"文档ID: {document['id']}, 状态: {document['run']}")
-
-    # 4. 创建聊天助手
-    dataset_ids = [dataset_id]
-    if assistant_id == None:
-        name = "新聊天助手qgz"
-        prompt = {
-            "empty_response": "抱歉！知识库中未找到相关内容！",
-            "keywords_similarity_weight": 0.7,
-            "opener": "你好！ 我是你的助理，有什么可以帮到你的吗？",
-            "prompt": """你是一个智能助手，请总结知识库的内容来回答问题，请列举知识库中的数据详细回答。当所有知识库内容都与问题无关时，你的回答必须包括“知识库中未找到您要的答案！”这句话。回答需要考虑聊天历史。
-            以下是知识库：
-            {knowledge}
-            以上是知识库。""",
-            "similarity_threshold": 0.2,
-            "top_n": 6,
-            "variables": [{"key": "knowledge", "optional": False}]
-        }
-        llm = {
-            "model_name": "gpt-4o-mini",
-            "temperature": 0.1,
-            "top_p": 0.3,
-            "presence_penalty": 0.4,
-            "frequency_penalty": 0.7
-        }
-        avatar = "None"  # 头像
-        assistant_id = ragflow.create_chat_assistant(name, avatar, dataset_ids, llm, prompt)
-        print(f"聊天助手创建成功，助手ID: {assistant_id}")
-
-    # 5.创建聊天会话
-    session_name = "新会话Code"
-    if assistan_session_id == None:
-        assistan_session_id = ragflow.create_chat_session(assistant_id, session_name)
-        print(f"会话创建成功，会话ID: {assistan_session_id}")
-
-    # #6.进行聊天会话
-    # question = "给我一份校赛挑战杯平台简易使用教程"
-    # response_data = ragflow.send_chat_message(assistant_id, question, stream=False, session_id=assistan_session_id)
-    # print(f"助手的回答: {response_data}")
-
-    agent_session_id = f"813972c0192f11f09a5942e643a9908f"
-    agent_id = "92c366ca192211f086c742e643a9908f"
-    ##注意，agent需要提前在web端的RAGflow构建好，提供好对应的agent ID
-    # 7.构建代理Agent会话
-    if agent_session_id == None:
-        agent_session_id = ragflow.create_agent_session(agent_id)
-        print(f"Agent会话创建成功，会话ID: {agent_session_id}")
-
-    # 8.进行代理Agent聊天
-    question = "给我一份校赛挑战杯平台简易使用教程"
-    response_data = ragflow.send_agent_message(agent_id, question, stream=False, session_id=agent_session_id)
-    print(f"助手的回答: {response_data}")
+# # 示例使用
+# if __name__ == "__main__":
+#     ragflow_BASE_URL = "http://127.0.0.1"  # rag_flow的后端地址
+#     ragflow_API_KEY="ragflow-NhN2I5ODZhMTg0MzExZjA4OThkNWFiZW" #qgz 的api key密钥
+#     ragflow = RAGflow(ragflow_BASE_URL,ragflow_API_KEY)
+#     # 创建数据集、上传文档、创建聊天助手、创建会话等操作
+#
+#     dataset_id = f"4f34a594192d11f093b942e643a9908f"  # 知识库ID
+#     assistant_id = f"395418f2192f11f0988f42e643a9908f"  # 会话助手ID
+#     assistan_session_id = f"4f432590192f11f0b3ad42e643a9908f"  # 聊天会话的ID
+#     #### 示例使用
+#     # # 1. 创建数据集
+#     if dataset_id == None:
+#         dataset_id = ragflow.create_dataset("测试数据集2", "上传文档并解析测试")
+#         print(f"成功创建知识库，dataset_id: {dataset_id}")
+#
+#     # # 2. 上传并解析文档
+#     # folder_path = f"D:/projcet_LLM/EduPlatform/Backend/static/ragflowParserDocs"
+#     # file_paths = ragflow.get_file_paths(folder_path)
+#     # document_id = ragflow.upload_and_parse_documents(dataset_id, file_paths)
+#
+#
+#     # 3.获取所有文档解析最新状态
+#     # 获取文档解析状态
+#     is_has_running, documents = ragflow.get_files_is_running(dataset_id)  # is_has_running为bool true表示有文件处于解析中 false则没有处于解析中
+#     # 打印文档解析状态
+#     print(f"获取文件状态：{is_has_running}")
+#     for document in documents:
+#         print(f"文档ID: {document['id']}, 状态: {document['run']}")
+#
+#     # 4. 创建聊天助手
+#     dataset_ids = [dataset_id]
+#     if assistant_id == None:
+#         name = "新聊天助手qgz"
+#         prompt = {
+#             "empty_response": "抱歉！知识库中未找到相关内容！",
+#             "keywords_similarity_weight": 0.7,
+#             "opener": "你好！ 我是你的助理，有什么可以帮到你的吗？",
+#             "prompt": """你是一个智能助手，请总结知识库的内容来回答问题，请列举知识库中的数据详细回答。当所有知识库内容都与问题无关时，你的回答必须包括“知识库中未找到您要的答案！”这句话。回答需要考虑聊天历史。
+#             以下是知识库：
+#             {knowledge}
+#             以上是知识库。""",
+#             "similarity_threshold": 0.2,
+#             "top_n": 6,
+#             "variables": [{"key": "knowledge", "optional": False}]
+#         }
+#         llm = {
+#             "model_name": "gpt-4o-mini",
+#             "temperature": 0.1,
+#             "top_p": 0.3,
+#             "presence_penalty": 0.4,
+#             "frequency_penalty": 0.7
+#         }
+#         avatar = "None"  # 头像
+#         assistant_id = ragflow.create_chat_assistant(name, avatar, dataset_ids, llm, prompt)
+#         print(f"聊天助手创建成功，助手ID: {assistant_id}")
+#
+#     # 5.创建聊天会话
+#     session_name = "新会话Code"
+#     if assistan_session_id == None:
+#         assistan_session_id = ragflow.create_chat_session(assistant_id, session_name)
+#         print(f"会话创建成功，会话ID: {assistan_session_id}")
+#
+#     # #6.进行聊天会话
+#     # question = "给我一份校赛挑战杯平台简易使用教程"
+#     # response_data = ragflow.send_chat_message(assistant_id, question, stream=False, session_id=assistan_session_id)
+#     # print(f"助手的回答: {response_data}")
+#
+#     agent_session_id = f"813972c0192f11f09a5942e643a9908f"
+#     agent_id = "92c366ca192211f086c742e643a9908f"
+#     ##注意，agent需要提前在web端的RAGflow构建好，提供好对应的agent ID
+#     # 7.构建代理Agent会话
+#     if agent_session_id == None:
+#         agent_session_id = ragflow.create_agent_session(agent_id)
+#         print(f"Agent会话创建成功，会话ID: {agent_session_id}")
+#
+#     # 8.进行代理Agent聊天
+#     question = "给我一份校赛挑战杯平台简易使用教程"
+#     response_data = ragflow.send_agent_message(agent_id, question, stream=False, session_id=agent_session_id)
+#     print(f"助手的回答: {response_data}")
