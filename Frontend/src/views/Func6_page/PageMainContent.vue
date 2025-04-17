@@ -136,13 +136,16 @@ export default {
     },
     handleSubmit() {
       if (!this.teacherScore || !this.teacherComment) {
-        this.$message.error('请完成评分和评语后再提交');
+        this.$message.error({message:'请完成评分和评语后再提交',duration:500});
         return;
       }
-      this.$message.success('批改完成');
+      this.$message.success({message:'批改完成',duration:500});
     },
     handleNext() {
-      this.$message.info('跳转到下一份');
+      this.$message.info({
+  message: '跳转到下一份',
+  duration: 500 // 设置显示时间为 1miao
+});
     },
     handleSubmitResults() {
       this.$message.success('阅卷结果已提交');
