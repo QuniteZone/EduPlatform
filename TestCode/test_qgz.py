@@ -1,99 +1,64 @@
-import requests
-import json
+from flask import Flask, request, jsonify
+from werkzeug.utils import secure_filename
+from flask_cors import CORS
+import os
+import fitz  # PyMuPDF
+import docx  # python-docx
 
-API_HOST = "http://127.0.0.1"
-API_KEY = "ragflow-k5MTJmNmQ0MDdiMjExZjA5ZWY4MDI0Mm"
-AGENT_ID = "0882ecc8168011f0a0f20242ac120003"
-question = "中国国家主席是谁"
+app = Flask(__name__)
+CORS(app)
 
-# 请求url
-url = API_HOST + "/api/v1/agents/" + AGENT_ID + "/completions"
-# print(url)
+UPLOAD_FOLDER = 'uploads'
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+ALLOWED_EXTENSIONS = {'pdf', 'docx'}
 
-# 自定义请求头
-headers = {
-    "Authorization": "Bearer %s" % API_KEY,
-    "Content-Type": "application/json",
-}
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-class AgentStreamResponse:
-    def __init__(self):
-        pass
+def extract_text_from_pdf(path):
+    text = ''
+    pdf = fitz.open(stream=path.read(), filetype="pdf")
+    for page in pdf:
+        text += page.get_text()
+    return text
 
-    def get_session_id(self):
-        """
-        获取会话 ID
-        """
-        data = {"id": AGENT_ID}
-        # response = requests.post(url, data=data, headers=headers)
-        try:
-            line_list = []
-            with requests.post(
-                    url, json=data, headers=headers, stream=True, timeout=30
-            ) as response:
-                if response.status_code == 200:
-                    for line in response.iter_lines():
-                        if line:  # 过滤掉空行
-                            line_list.append(line.decode("utf-8"))
-                else:
-                    print(f"请求失败，状态码: {response.status_code}")
-                    return False
+def extract_text_from_docx(path):
+    text = ''
+    doc = docx.Document(path)
+    for para in doc.paragraphs:
+        text += para.text + '\n'
+    return text
 
-            first_line = line_list[0]
-            line_row = first_line.split("data:")[1]# 提取data内容
-            line_dict = json.loads(line_row)# json解析
-            session_id = line_dict["data"]["session_id"]# 获取session_id
-            return session_id
-        except requests.exceptions.RequestException as e:
-            print(f"请求错误: {e}")
-            return False
+@app.route('/plan/lesson_script', methods=['POST'])
+def handle_lesson_script():
+    transcription_requirements = request.form.get('require', '')
+    uploaded_files = request.files.getlist('files')
+    parsed_texts = {}
+    content = {}  # 返回结构
 
-    def get_data(self,stream=False):
-        """
-        获取数据
-        :return:
-        """
-        try:
-            session_id = self.get_session_id()
-            data = {
-                "id": AGENT_ID,
-                "question": question,
-                "stream": "true",
-                "session_id": session_id,
-            }
-            with requests.post(url, json=data, headers=headers, stream=stream, timeout=30) as response:
-                if response.status_code == 200:
-                    if stream:
-                        lines = response.iter_lines()
-                        line_list = []  # 用于存储所有行
-                        for line in lines:
-                            if line:  # 过滤掉空行
-                                decoded_line = line.decode("utf-8")
-                                line_list.append(decoded_line)  # 将解码后的行添加到列表中
+    if not uploaded_files:
+        content["status"] = -1  # 表示文件未上传
+        content["content"] = None
 
-                        second_last_data = line_list[-2]
-                        # for line in response.iter_lines():
-                        #     if line:  # 过滤掉空行
-                        #         print(line.decode("utf-8"))
-
-                    else:
-                        print(response.text)
-                        print(f"{type(response.text)}")
-
-                        # 将数据字符串按行分割
-                        lines = response.text.strip().split('\n\n')
-                        second_last_data = lines[-2]
-                    json_part = second_last_data.split("data:")[1]  # 获取 提取 JSON 部分 "data:" 后面的部分
-                    data_object = json.loads(json_part) # 解析 JSON 字符串为字典对象
-                    return data_object
-                else:
-                    print(f"请求失败，状态码: {response.status_code}")
-        except requests.exceptions.RequestException as e:
-            print(f"请求错误: {e}")
+    for file in uploaded_files:
+        if file and allowed_file(file.filename):
+            ext = file.filename.rsplit('.', 1)[1].lower()  # 直接读取文件内容
+            if ext == 'pdf':
+                parsed_text = extract_text_from_pdf(file.stream)  # 使用 file.stream 直接读取
+            else:
+                parsed_text = extract_text_from_docx(file.stream)  # 使用 file.stream 直接读取
+            parsed_texts[file.filename] = parsed_text
+        else:
+            content["status"] = -2  # 不支持该文件类型
+            content["content"] = None
 
 
-if __name__ == "__main__":
-    agent_stream_response = AgentStreamResponse()
-    return_result= agent_stream_response.get_data(stream=True)
-    print(f"return_result: {return_result}")
+    content["content"] = f"这是逐字稿, 逐字稿要求: {transcription_requirements} + '解析' + {parsed_texts}"
+    content["status"] = 1
+    print(f"content: {content}")
+    return jsonify(content)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5002, debug=True)

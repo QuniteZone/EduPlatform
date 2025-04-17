@@ -2,12 +2,15 @@
 import json
 import re
 
+import docx
+import fitz
 import openai
-from Apps.config import model,temperature
+from Apps.ragflow_operations import RAGflow
+from Apps.config import model,temperature,ragflow_BASE_URL,ragflow_API_KEY
 import Apps.config
 
-
-
+ALLOWED_EXTENSIONS = {'pdf', 'docx'} #在生成逐字稿时，所允许上传的文件类型
+ragflow = RAGflow(ragflow_BASE_URL,ragflow_API_KEY)
 
 def format_lesson_plan(text):
     # 使用正则表达式提取被 ```markdown 和 ``` 包裹的内容
@@ -76,6 +79,28 @@ def LLM_StreamOutput(messages):
 
 
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def extract_text_from_pdf(path):
+    text = ''
+    try:
+        pdf = fitz.open(stream=path.read(), filetype="pdf")
+        for page in pdf:
+            text += page.get_text()
+    except Exception as e:
+        text = f"[PDF解析失败]: {str(e)}"
+    return text
+
+def extract_text_from_docx(path):
+    text = ''
+    try:
+        doc = docx.Document(path)
+        for para in doc.paragraphs:
+            text += para.text + '\n'
+    except Exception as e:
+        text = f"[Word解析失败]: {str(e)}"
+    return text
 
 
 
