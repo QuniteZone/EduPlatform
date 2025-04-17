@@ -5,7 +5,10 @@
       <el-menu-item index="/function1"><el-icon><Memo /></el-icon>教案生成</el-menu-item>
       <el-menu-item index="/function2"><el-icon><Tickets /></el-icon>逐字稿生成</el-menu-item>
       <el-menu-item index="/function3" ><el-icon><Monitor /></el-icon>PPT生成</el-menu-item>
-      <el-menu-item index="-4" disabled><el-icon><DataLine /></el-icon>班会稿生成</el-menu-item>
+      <el-menu-item index="/function4" ><el-icon><DataLine /></el-icon>班会稿生成</el-menu-item>
+      <el-menu-item index="/function5" ><el-icon><DataLine /></el-icon>智能出题</el-menu-item>
+      <el-menu-item index="/function6"  disabled><el-icon><DataLine /></el-icon>主观题批阅</el-menu-item>
+
       <el-sub-menu index="-1">
         <template #title>测试1</template>
         <el-menu-item index="2-1">item one</el-menu-item>
