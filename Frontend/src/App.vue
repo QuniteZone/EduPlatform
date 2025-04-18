@@ -10,7 +10,7 @@
       <el-menu-item index="/function6" ><el-icon><DataLine /></el-icon>主观题批阅</el-menu-item>
       <el-menu-item index="/function7" ><el-icon><DataLine /></el-icon>作业辅导</el-menu-item>
       <el-menu-item index="/function8" ><el-icon><DataLine /></el-icon>AI学习计划</el-menu-item>
-
+      <el-menu-item index="/function9" ><el-icon><DataLine /></el-icon>智能知识点梳理</el-menu-item>
 
 
       <el-sub-menu index="-1">

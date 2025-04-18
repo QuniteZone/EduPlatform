@@ -4,6 +4,7 @@
 // import store from './store'
 
 // createApp(App).use(store).use(router).mount('#app')
+import 'highlight.js/styles/monokai-sublime.css'
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'

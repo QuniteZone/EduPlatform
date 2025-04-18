@@ -65,11 +65,20 @@
               <el-input v-model="teacherScore" placeholder="请输入教师打分"></el-input>
             </div>
             <div class="score-buttons">
-              <el-button-group>
-                <el-button
+              <!-- <el-rate
+                  v-model="value"
+                  :texts="['oops','oopss', 'disappointed', 'normal', 'good', 'great']"
+                  show-text
+                  allow-half
+                  @click="setTeacherScore(score)"
+                  :class="{ active: teacherScore === score }"
+              /> -->
+              <el-button-group class='button-group'>
+                <el-button 
+                  size="small"
                   v-for="score in [1, 2, 3, 4, 5, 6, 7, 8, 9]"
                   :key="score"
-                  type="primary"
+                  
                   @click="setTeacherScore(score)"
                   :class="{ active: teacherScore === score }"
                 >
@@ -96,6 +105,11 @@
                 v-model="teacherComment"
               ></el-input>
             </div>
+            <el-rate
+                  v-model="value"
+                  :texts="['oops', 'disappointed', 'normal', 'good', 'great']"
+                  show-text
+              />
           </el-card>
         </el-col>
       </el-row>
@@ -183,7 +197,9 @@ export default {
   align-items: center;
   gap: 15px;
 }
-
+.button-group{
+  margin-top: 20px;
+}
 .header-text {
   font-size: 16px;
   color: #606266;
@@ -191,6 +207,7 @@ export default {
 
 /* 题目和学生答案容器样式 */
 .question-answer-container {
+  text-align: center;
   margin-bottom: 20px;
 }
 
@@ -254,6 +271,7 @@ export default {
 }
 
 .section-title {
+  text-align: center;
   font-size: 16px;
   font-weight: bold;
   margin-bottom: 15px;
@@ -261,15 +279,18 @@ export default {
 }
 
 .score-input {
+
   margin-bottom: 15px;
 }
 
 .ai-actions {
+  text-align: center;
   margin-bottom: 15px;
 }
 
 .comment-section,
 .comment-input {
+  text-align: center;
   margin-top: 15px;
 }
 
@@ -284,9 +305,10 @@ export default {
 }
 
 .special-scores {
+  justify-content: center;
   display: flex;
-  gap: 10px;
-  margin-top: 10px;
+  gap: auto;
+  margin-top: 20px;
 }
 
 .active {
