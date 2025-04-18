@@ -11,8 +11,6 @@
       <el-menu-item index="/function7" ><el-icon><DataLine /></el-icon>作业辅导</el-menu-item>
       <el-menu-item index="/function8" ><el-icon><DataLine /></el-icon>AI学习计划</el-menu-item>
       <el-menu-item index="/function9" ><el-icon><DataLine /></el-icon>智能知识点梳理</el-menu-item>
-
-
       <el-sub-menu index="-1">
         <template #title>测试1</template>
         <el-menu-item index="2-1">item one</el-menu-item>
@@ -44,5 +42,4 @@ const handleSelect = (key: string, keyPath: string[]) => {
   router.push(key)
   console.log(key, keyPath)
 }
-
 </script>
