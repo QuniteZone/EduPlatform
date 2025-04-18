@@ -5,16 +5,52 @@ import openai
 os.environ["OPENAI_BASE_URL"] = "https://api.chatanywhere.tech"
 os.environ["OPENAI_API_KEY"] = "sk-QBFgXmIcXeaR5v40BZN3jabFKtSkoudkpIz4vmGU6V8Uu4N6"
 model='gpt-3.5-turbo'
+temperature=0.5
 
 
-def predict(model, messages, temperature=0, top_p=1, max_tokens=4096):
-    response = openai.chat.completions.create(
-        model=model,
-        messages=messages,
-        temperature=temperature
-    )
-    message = response.choices[0].message.content
-    return message
+def format_lesson_plan(text):
+    # 使用正则表达式提取被 ```markdown 和 ``` 包裹的内容
+    match = re.search(r'```markdown\s*(.*?)\s*```', text, re.DOTALL)
+    if match:
+        # 提取匹配到的内容并去掉前后的空白
+        return match.group(1).strip()
+    else:
+        return False
+
+def LLM(messages):
+    max_retries = 5
+    retry_count = 0
+    while retry_count < max_retries:
+        # 调用 OpenAI API
+        response = openai.chat.completions.create(
+            model=model,
+            temperature=temperature,
+            messages=messages,
+            max_tokens=4095,
+        )
+
+        # 提取模型返回的内容
+        content = response.choices[0].message.content
+
+        # 解析 JSON 内容
+        result = format_lesson_plan(content)
+
+        if result:
+            return result
+        else:
+            # 如果 JSON 解析失败，提供反馈并重试
+            feedback = "请返回严格的 Markdown 格式"
+            messages.append({
+                "role": "assistant",
+                "content": content
+            })
+            messages.append({
+                "role": "user",
+                "content": feedback
+            })
+            retry_count += 1
+            print(f"第 {retry_count} 次尝试")
+    return False
 
 
 if __name__ == '__main__':
@@ -204,6 +240,7 @@ if __name__ == '__main__':
     messages = [{"role": "system",
                  "content": "你是一个资深的教育工作者，你需要按照用户的要求生成一份专业、有实用价值的教师上课逐字稿。"},
                 {"role": "user", "content": prompt}]
+
 
     message = predict(model, messages=messages)
     print(message)

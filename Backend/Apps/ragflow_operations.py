@@ -250,14 +250,18 @@ class RAGflow:
             raise Exception(f"请求失败，状态码: {response.status_code}, 响应内容: {response.text}")
 
 
-    def create_agent_session(self, agent_id: str, user_id: str = None, **kwargs) -> str:
+    def create_agent_session(self, agent_id: str, user_id: str = None,important_para=None) -> str:
         """
         创建与代理的会话，返回会话的ID
         """
         url = f"{self.BASE_URL}/api/v1/agents/{agent_id}/sessions"
 
         # 构建请求体
-        payload = kwargs  # 将其他参数作为请求体的一部分
+        payload = {}  # 将其他参数作为请求体的一部分
+
+        if important_para !=None:#遍历important_para对象，将参数添加到payload中
+            for key, value in important_para.items():
+                payload[key] = value
 
         # 如果提供了 user_id，则将其添加到请求参数中
         if user_id:
@@ -273,6 +277,30 @@ class RAGflow:
             return session_id
         else:
             raise Exception(f"创建会话失败: {data}")
+
+    def delete_agent_session(self, agent_id: str, session_id) -> dict:
+        """
+        删除与代理关联的会话
+        :param agent_id: 代理的 ID
+        :param session_ids: 要删除的会话 ID 列表
+        """
+        url = f"{self.BASE_URL}/api/v1/agents/{agent_id}/sessions"
+        session_ids=[session_id]
+        # 构建请求体
+        payload = {
+            "ids": session_ids
+        }
+
+        # 发送 DELETE 请求
+        response = requests.delete(url, headers=self.HEADERS, json=payload)
+        data = response.json()
+
+        # 检查响应状态
+        if data.get("code") == 0:
+            return {"status": "success", "message": "会话删除成功"}
+        else:
+            raise Exception(f"删除会话失败: {data}")
+
 
     def send_agent_message(self, agent_id: str, question: str, stream: bool = True, session_id: str = None, user_id: str = None):
         """
@@ -323,7 +351,30 @@ class RAGflow:
 
 
 
-# # 示例使用
+
+# #使用示例
+# ragflow_BASE_URL = "http://127.0.0.1"  # rag_flow的后端地址
+# ragflow_API_KEY="ragflow-NhN2I5ODZhMTg0MzExZjA4OThkNWFiZW" #qgz 的api key密钥
+# ragflow = RAGflow(ragflow_BASE_URL,ragflow_API_KEY)
+# TextbookRetr_AgentID="8249059c1a9011f0ae7f9213fbf6b9fc"
+#
+# agent_session_id = ragflow.create_agent_session(TextbookRetr_AgentID)
+#
+# # 进行代理Agent聊天
+# question = "qinguo1"
+# response_data = ragflow.send_agent_message(TextbookRetr_AgentID, question, stream=False, session_id=agent_session_id)
+#
+#
+#
+# # 删除该Agent会话
+# ragflow.delete_agent_session(TextbookRetr_AgentID, agent_session_id)
+
+
+
+
+
+
+# # # 示例使用
 # if __name__ == "__main__":
 #     ragflow_BASE_URL = "http://127.0.0.1"  # rag_flow的后端地址
 #     ragflow_API_KEY="ragflow-NhN2I5ODZhMTg0MzExZjA4OThkNWFiZW" #qgz 的api key密钥
